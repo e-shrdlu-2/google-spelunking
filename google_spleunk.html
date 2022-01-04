@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- todo:
+    - mobile friendly
+    - light/dark mode
+    - add css
+ -->
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>google spelunking</title>
+    </head>
+    <body>
+        <h1>google spelunking</h1>
+        <p>exploring the depths of the internet</p>
+        <hr/>
+        <a>your spelunk: </a><input type="text" id="user_query" value="example"></input><input type="button" id="go_btn" value="spelunk!" onclick="spelunk(true)"></input>
+        <br/>
+        <a id="link" target="_blank" rel="noreferrer noopener"></a>
+        <br/>
+        <br/>
+        <iframe id="frame" title="test" width=916 height=500px></iframe>
+        <h3>settings:</h3>
+        <a>Depth: </a><input type="number" id="depth" value=10 onchange="update_settings_url()"></input>
+        <a> | Base Query: </a><input type="text" id="base_query" value="site:youtube.com" onchange="update_settings_url()"></input>
+        <a> | Redirect:</a><input type="checkbox" id="redirect" onchange="update_settings_url()"></input>
+        <a> | Open links in new tab (recommended):</a><input type="checkbox" id="newtab" checked="" onchange="update_settings_url()"></input>
+        <br/>
+        <a>keep these settings at </a><a id="settings_url">placeholder</a>
+        <br/>
+        <br/>
+        <h2>how to use</h2>
+        <p>
+            simply type anything into the box, hit "spelunk!", and click the most interesting looking result. <br/>
+            Because of youtube security settings, it is not possible to view youtube videos directly on this page (you must open in new tab), however some other websites may work on this page. To try this, uncheck the "open links in new tab" setting and change the "base query" setting to allow other websites.
+        </p>
+        <br/>
+        <h2>what is this?</h2>
+        <p>
+            google spelunking is something I invented. I was bored with only getting the same few types of results. After all, the internet is huge! Why limit yourself to only the surface? The best way to dive deeper into the internet, I thought, would be to explore past the first page of search results. My favorite way to do this is searching for youtube videos, but it can be expanded to anything using the settings above (try looking up google search operators to filter by websites, filetypes, etc.)
+        </p>
+        <br/>
+        <h2>what should I look up?</h2>
+        <p>
+            anything you feel like! you have the whole internet waiting for you to explore it, all you have to do is type in a word
+            <br/>
+            if youre still having trouble, heres some ideas to start with:
+            <ul>
+                <li>top 10 tips</li>
+                <li>review</li>
+                <li>vlog</li>
+                <li>video essay</li>
+                <li>is it normal to</li>
+                <li>pilot episode</li>
+                <li>why is my</li>
+                <li>commercial</li>
+            </ul>
+            feel free to expand on these, or just copy/paste them exactly as they are
+        </p>
+
+        <script type="text/javascript">
+            function spelunk(follow_redirect) {
+                var user_query = document.getElementById('user_query').value;
+                var depth = document.getElementById('depth').value;
+                var base_query = document.getElementById('base_query').value;
+                var redirect = document.getElementById('redirect').checked;
+                var newtab = document.getElementById('newtab').checked*1; // change to int
+                var spelunk_url=`https://www.google.com/search?igu=1&newwindow=${newtab}&start=${(depth-1)*10}&q=${base_query}+${user_query}`.replaceAll(' ','+');
+
+                if (redirect && follow_redirect) {
+                    window.location=spelunk_url;
+                }
+                else {
+                    document.getElementById('link').href=spelunk_url;
+                    document.getElementById('link').innerText=spelunk_url;
+                    document.getElementById('frame').src=spelunk_url;
+                }
+            }
+            function update_settings_url() {
+                // get settings values and current url
+                var depth = document.getElementById('depth').value;
+                var base_query = document.getElementById('base_query').value;
+                var redirect = document.getElementById('redirect').checked*1; // "*1" to change to int, 1 or 0
+                var newtab = document.getElementById('newtab').checked*1; // change to int
+                var base_url = window.location.toString().split('#')[0]
+
+                // build url
+                var settings_url = `${base_url}#depth=${depth}&base_query=${base_query}&redirect=${redirect}&newtab=${newtab}`;
+
+                // change link on page
+                var settings_url_link = document.getElementById('settings_url');
+                settings_url_link.href = settings_url;
+                settings_url_link.innerText = settings_url;
+            }
+
+            window.addEventListener('DOMContentLoaded', function() {
+                // set main textbox so that enter key presses button
+                var user_query_input_box = document.getElementById('user_query');
+                user_query_input_box.addEventListener('keyup', function(event) {
+                    if (event.keyCode === 13) {
+                        document.getElementById('go_btn').click();
+                    }
+                })
+
+                // select and highlight all text in main textbox
+                document.getElementById('user_query').select();
+
+                // change iframe to 90% of window size
+                document.getElementById('frame').width = Math.round(window.innerWidth*0.9)
+
+                update_settings_url();
+
+                // get settings from current url
+                var settings = window.location.toString().split('#')[1].split('&'); // result should be array of strings, such as: ['depth=10','redirect=0', ...]
+                settings.forEach((setting_str) => {
+                    setting = setting_str.split('=')[0];
+                    val = setting_str.split('=')[1];
+                    console.log(setting,val)
+                    switch (setting) {
+                        case 'depth':
+                            document.getElementById('depth').value = val;
+                            break;
+                        case 'base_query':
+                            document.getElementById('base_query').value = val;
+                            break;
+                        case 'redirect':
+                            document.getElementById('redirect').checked = val*1;
+                            break;
+                        case 'newtab':
+                            document.getElementById('newtab').checked = val*1;
+                            break;
+                        default:
+                            console.log(`setting ${setting} with value ${val} not found`);
+                            break;
+                    }
+                })
+
+                // set up exapmle spelunk
+                spelunk(false);
+            })
+        </script>
+    </body>
+</html>
